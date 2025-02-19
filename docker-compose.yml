@@ -1,0 +1,45 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel-app
+        volumes:
+            - .:/var/www/html
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
+        networks:
+            - laravel-net
+        command: php artisan serve --host=0.0.0.0 --port=8000
+    db:
+        image: postgres:15
+        container_name: postgres-db
+        environment:
+            POSTGRES_USER: laravel
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: laravel_db
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - laravel-net
+
+    artisan:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: artisan
+        working_dir: /var/www/html
+        entrypoint: ["php", "artisan"]
+        networks:
+            - laravel-net
+
+volumes:
+    db_data:
+
+networks:
+    laravel-net:
+        driver: bridge
